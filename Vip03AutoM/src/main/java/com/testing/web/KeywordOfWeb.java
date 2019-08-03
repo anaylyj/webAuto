@@ -1,17 +1,26 @@
 package com.testing.web;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.testing.autocommon.AutoLogger;
 import com.testing.driverself.FFDriver;
 import com.testing.driverself.GoogleDriver;
 import com.testing.driverself.IEDriver;
@@ -35,6 +44,7 @@ public class KeywordOfWeb {
 				driver = gg.getDriver();
 				//调用隐式等待设置
 				invisibleWait();
+				AutoLogger.log.info("打开Chrome浏览器");
 				break;
 			case "FireFox":
 				FFDriver ff = new FFDriver("C:\\Program Files\\Mozilla Firefox\\firefox.exe",
@@ -42,6 +52,7 @@ public class KeywordOfWeb {
 				driver = ff.getDriver();
 				//调用隐式等待设置
 				invisibleWait();
+				AutoLogger.log.info("打开FireFox浏览器");
 				break;
 			case "IE":
 				IEDriver ie = new IEDriver("ExeDriver/IEDriver.exe");
@@ -74,15 +85,38 @@ public class KeywordOfWeb {
 		}
 	}
 
+	
+	public void input(String XPath, String content) {
+		driver.findElement(By.xpath(XPath)).clear();
+		driver.findElement(By.xpath(XPath)).sendKeys(content);
+	}
+
+	/**
+	 * @author xn087454 直接传递By类型进行定位
+	 * @param by
+	 * @param content
+	 */
 	public void inputByName(String name, String content) {
 		try {
 			WebElement ele = driver.findElement(By.name(name));
 			// 清空当前输入框内容
 			ele.clear();
-			//元素输入simulate typing into an element, which may set its value
+			// 元素输入simulate typing into an element, which may set its value
 			ele.sendKeys(content);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void inputBylocator(By by, String content) {
+		driver.findElement(by).clear();
+		driver.findElement(by).sendKeys(content);
+	}
+
+	public void multiElementText(String XPath) {
+		List<WebElement> alist = driver.findElements(By.xpath(XPath));
+		for (WebElement ele : alist) {
+			System.out.println(ele.getText());
 		}
 	}
 
@@ -90,7 +124,8 @@ public class KeywordOfWeb {
 		try {
 			driver.findElement(By.xpath(XPath)).click();
 		} catch (Exception e) {
-			e.printStackTrace();
+			AutoLogger.log.error(e, e.fillInStackTrace());
+			saveScreenShot("click");
 		}
 	}
 
@@ -260,12 +295,24 @@ public class KeywordOfWeb {
 		}
 	}
 
-	public void assertTitle(String expect) {
-		String title = getTitle();
-		if (title.contains(expect)) {
-			System.out.println("测试执行成功！");
-		} else {
-			System.out.println("测试执行失败！");
+
+	public void selectValue(String Xpath,String selector){
+		try {
+			WebElement ele=driver.findElement(By.xpath(Xpath));
+			Select se=new Select(ele);
+			se.selectByValue(selector);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void selectVisibleText(String Xpath,String text){
+		try {
+			WebElement ele=driver.findElement(By.xpath(Xpath));
+			Select se=new Select(ele);
+			se.selectByVisibleText(text);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	public void uploadFile(String XPath,String filepath) {
@@ -276,19 +323,23 @@ public class KeywordOfWeb {
 		}
 	}
 
-	public void input(String XPath, String content) {
-		driver.findElement(By.xpath(XPath)).clear();
-		driver.findElement(By.xpath(XPath)).sendKeys(content);
-	}
 
-	/**
-	 * @author xn087454 直接传递By类型进行定位
-	 * @param by
-	 * @param content
-	 */
-	public void inputBylocator(By by, String content) {
-		driver.findElement(by).clear();
-		driver.findElement(by).sendKeys(content);
+	
+	public void saveScreenShot(String method){
+		Date date=new Date();
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd HH-mm-ss");
+		String createdate=sdf.format(date);
+		
+		String scrshotName="log/ScrShot/"+method+createdate+".png";
+		
+		File scrShot=new File(scrshotName);
+		File tmp=((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+		
+		try {
+			FileUtils.copyFile(tmp, scrShot);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void assertElementTextIs(String cssSelector, String expect) {
@@ -317,13 +368,15 @@ public class KeywordOfWeb {
 			System.out.println("测试失败！");
 		}
 	}
-
-	public void multiElementText(String XPath) {
-		List<WebElement> alist = driver.findElements(By.xpath(XPath));
-		for (WebElement ele : alist) {
-			System.out.println(ele.getText());
+	public void assertTitle(String expect) {
+		String title = getTitle();
+		if (title.contains(expect)) {
+			System.out.println("测试执行成功！");
+		} else {
+			System.out.println("测试执行失败！");
 		}
 	}
+
 	
 
 }

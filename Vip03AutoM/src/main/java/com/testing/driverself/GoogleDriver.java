@@ -15,7 +15,7 @@ public class GoogleDriver {
 		option.addArguments("--disable-infobars");
 		
 		//加载Chrome 用户文件
-		option.addArguments("--user-data-dir=C:\\Users\\xn087454\\AppData\\Local\\Google\\Chrome\\User Data");
+		option.addArguments("--user-data-dir=C:\\Users\\kingk\\AppData\\Local\\Google\\Chrome\\User Data\\Default");
 		
 		//最大化浏览器窗口
 		option.addArguments("--start-maximized");
